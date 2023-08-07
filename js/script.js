@@ -2,6 +2,56 @@ const global = {
     currentPage: window.location.pathname
 };
 
+function createCard(data){
+    //creating the card div
+    const div = document.createElement('div');
+    div.classList.add('card');
+
+    //creating img
+    const img = document.createElement('img');
+    img.classList.add("card-img-top");
+    img.alt = data.title;
+    if(data.poster_path){
+        img.src = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
+    }
+    else{
+        img.src = "images/no-image.jpg";
+    }
+    //fill the card with all the details
+    div.innerHTML = `
+        <a href="movie-details.html?id=${data.id}">
+            ${img.outerHTML}
+        </a>
+        <div class="card-body">
+            <h5 class="card-title">${data.title}</h5>
+            <p class="card-text">
+                <small class="text-muted">Release: ${data.release_date}</small>
+            </p>
+        </div>
+    `;
+    return div
+}
+
+async function displayPopularMovies(){
+    const data = await fetchAPIData("movie/popular");
+    const movies = data.results;  
+    movies.forEach((movie) => {
+        const div = createCard(movie);
+        // adding the div to the list
+        document.querySelector('#popular-movies').appendChild(div);
+    })
+}
+
+//fetch data from TMDB API
+async function fetchAPIData(endpoint){
+    const API_KEY = 'ce6dfbc3cf462594d189f2dff528ba8d';
+    const API_URL = 'https://api.themoviedb.org/3/';
+    
+    const response = await fetch(`${API_URL}${endpoint}?api_key=${API_KEY}&?language=en-US`);
+    const data = await response.json();
+    return data;
+}
+
 //Highlight active link
 function highlightActiveLink(){
     const links = document.querySelectorAll('.nav-link');
@@ -17,7 +67,7 @@ function init(){
     switch(global.currentPage) {
         case "/":
         case "/index.html":    
-            console.log('home');
+            displayPopularMovies();
             break;
         case "/shows.html":
             console.log("shows");
