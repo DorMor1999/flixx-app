@@ -87,7 +87,6 @@ async function displayPopularShows(){
 function createCardMovieDitails(data){
     //create a div
     const div = document.createElement('div');
-    console.log(data);
 
     //creating img
     const img = document.createElement('img');
@@ -139,6 +138,87 @@ function createCardMovieDitails(data){
     return div;
 }
 
+//display movies details
+async function displayMovieDetails(){
+    const movieId = window.location.search.split('=')[1];
+
+    const movie = await fetchAPIData(`movie/${movieId}`);
+
+    //overlay for background image
+    displayBackgroundImage('movie', movie.backdrop_path);
+
+    const div = createCardMovieDitails(movie);
+
+    document.querySelector('#movie-details').appendChild(div);
+}
+
+function createCardShowDitails(data){
+    //create a div
+    const div = document.createElement('div');
+
+    //creating img
+    const img = document.createElement('img');
+    img.classList.add("card-img-top");
+    img.alt = data.name;
+    if(data.poster_path){
+        img.src = `https://image.tmdb.org/t/p/w500${data.poster_path}`;
+    }
+    else{
+        img.src = "images/no-image.jpg";
+    }
+
+    div.innerHTML = `
+    <div class="details-top">
+    <div>
+      ${img.outerHTML}
+    </div>
+    <div>
+      <h2>${data.name}</h2>
+      <p>
+        <i class="fas fa-star text-primary"></i>
+        ${data.vote_average.toFixed(1)} / 10
+      </p>
+      <p class="text-muted">Last Air Date: ${data.last_air_date}</p>
+      <p>
+        ${data.overview}
+      </p>
+      <h5>Genres</h5>
+      <ul class="list-group">
+        ${data.genres.map((gener) => `<li>${gener.name}</li>`).join('')}
+      </ul>
+      <a href="${data.homepage}" target="_blank" class="btn">Visit Show Homepage</a>
+    </div>
+  </div>
+  <div class="details-bottom">
+    <h2>Show Info</h2>
+    <ul>
+      <li><span class="text-secondary">Number Of Episodes:</span> ${data.number_of_episodes}</li>
+      <li><span class="text-secondary">Last Episode To Air:</span> ${data.last_episode_to_air.name}</li>
+      <li><span class="text-secondary">Status:</span> ${data.status}</li>
+    </ul>
+    <h4>Production Companies</h4>
+    <div class="list-group">
+        ${data.production_companies.map((company) => `<span>${company.name}</span>`).join(", ")}
+    </div>
+  </div>
+    `;
+    return div;
+}
+
+//display movies details
+async function displayShowDetails(){
+    const showId = window.location.search.split('=')[1];
+
+    const show = await fetchAPIData(`tv/${showId}`);
+
+    //overlay for background image
+    displayBackgroundImage('tv', show.backdrop_path);
+
+    const div = createCardShowDitails(show);
+
+    document.querySelector('#show-details').appendChild(div);
+}
+
 //display backdrop on details pages
 function displayBackgroundImage(type, backgroundPath){
     const overlayDiv = document.createElement('div');
@@ -161,20 +241,6 @@ function displayBackgroundImage(type, backgroundPath){
     else{
         document.querySelector('#show-details').appendChild(overlayDiv);
     }
-}
-
-//display movies details
-async function displayMovieDetails(){
-    const movieId = window.location.search.split('=')[1];
-
-    const movie = await fetchAPIData(`movie/${movieId}`);
-
-    //overlay for background image
-    displayBackgroundImage('movie', movie.backdrop_path);
-
-    const div = createCardMovieDitails(movie);
-
-    document.querySelector('#movie-details').appendChild(div);
 }
 
 //fetch data from TMDB API
@@ -228,7 +294,7 @@ function init(){
             displayMovieDetails();
             break;
         case "/tv-details.html":
-            console.log("tv-details");
+            displayShowDetails();
             break;
         case "/search.html":
             console.log("search");
